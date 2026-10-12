@@ -1,0 +1,11 @@
+# dsh-skill-mgr bundle layer: inserts the dual-face plugin row into the web
+# profile roster. Applied as a profile bundle layer (the `dsh.bundle.patch`
+# manifest field) over dsh-base.
+#
+# The row is a bare plugin by package name: the node half (exports ".") runs in
+# the host process and mounts the skillMgr Typert Remote, and the `dsh.client`
+# declaration in package.json loads the browser half (exports "./client") as the
+# left-sidebar panel.
+- insert:
+    - id: skill-mgr
+      name: 'dsh-skill-mgr'

@@ -1,0 +1,230 @@
+/* dsh-skill-mgr panel — Apple-style: generous whitespace, inset grouped
+   cards, hairline separators, restrained accents.
+   Colours come from the host theme tokens (dsh-client-ui-theme defines them
+   on :root, with dark overrides on body[data-ds-dark-theme]); the state tints
+   are color-mix() derivations of the same tokens, so dark mode needs no
+   separate rule and no light-tuned literal exists here. Sizes, spacing,
+   radii, fonts and layout are deliberately untouched.
+
+   The panel is a full-height page with its own scroll container (the built-in
+   Plugins page geometry), not a centred settings column: `.page` owns the
+   layout, `.pageHead` the title row and `.view` the body. The
+   Skills tab is one flat table (`.table`), modelled on the MCP manager's
+   global-server table. */
+
+.page { box-sizing: border-box; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 0 clamp(24px, 4vw, 48px) 48px; overflow: auto; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif; -webkit-font-smoothing: antialiased; color-scheme: light dark; color: var(--dsw-alias-label-primary); /* Dot colors: the user-chosen colors arrive inline from the settings card; these are the unchosen fallbacks, resolved to the theme's business/success tokens so dark mode needs no override. */ --mgr-model: var(--dsw-alias-state-business-primary); --mgr-user: var(--dsw-alias-state-success-primary); /* Host theme tokens (--dsw-alias-*, dsh-client-ui-theme). Neutral var()s keep the pre-token colour as their fallback; state colours have no fallback (the pre-token literals were light-tuned). */ --mgr-accent: var(--dsw-alias-state-business-primary); --mgr-text: var(--dsw-alias-label-primary, currentColor); --mgr-text-2: var(--dsw-alias-label-secondary, #61666b); --mgr-text-3: var(--dsw-alias-label-tertiary, #81858c); --mgr-text-4: var(--dsw-alias-label-caption, #adb2b8); --mgr-surface: var(--dsw-alias-bg-module-platform, rgba(128,128,128,.06)); --mgr-hover: var(--dsw-alias-interactive-bg-hover, rgba(128,128,128,.08)); --mgr-active: var(--dsw-alias-interactive-bg-active, rgba(128,128,128,.16)); --mgr-border: var(--dsw-alias-border-l2, rgba(128,128,128,.13)); --mgr-border-2: var(--dsw-alias-border-l3, rgba(128,128,128,.2)); --mgr-danger: var(--dsw-alias-state-error-primary); --mgr-success: var(--dsw-alias-state-success-primary); --mgr-warn: var(--dsw-alias-state-warn-primary); --mgr-on-accent: var(--dsw-alias-label-primary-foreground); --mgr-skeleton: var(--dsw-alias-bg-skeleton, rgba(128,128,128,.1)); }
+.page > * { width: 100%; max-width: 960px; }
+/* Page head: title/intro on the left, the action cluster on the right; Darwin
+   clears the window traffic lights (the frame reports its own inset).
+
+   Whichever page-level header renders first owns that clearance — `.page` itself
+   carries no top padding — so the list header (`.pageHead`) and the detail
+   header (`.detailHead`) share this offset. Without it the inspect view sits
+   flush against the app's top boundary. */
+.pageHead,
+.detailHead { box-sizing: border-box; padding-top: 28px; }
+[data-platform=darwin] .pageHead,
+[data-platform=darwin] .detailHead { padding-top: calc(28px + var(--dsh-frame-top-clearance, 0px)); }
+.pageHead { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.pageIntro { margin: 4px 0 0; font-size: 13px; line-height: 20px; color: var(--mgr-text-2); }
+/* The single view body: the old tab-panel column, with nothing to switch to. */
+.view { display: flex; flex-direction: column; gap: 12px; }
+
+/* Page title, matching the shell's own pages (and dsh-mcp-mgr): 20px/500, not
+   the 24px/700 a settings card would use. A panel header that outweighs the
+   built-in pages reads as a different level of the hierarchy. */
+.title { font-size: 20px; font-weight: 500; line-height: 28px; margin: 0; }
+.hint { font-size: 12px; color: var(--mgr-text-3); }
+.actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Search: filled rounded field, no border. */
+.search { width: 100%; padding: 10px 14px; border: none; border-radius: 10px; background: var(--mgr-surface); color: inherit; font-size: 13px; outline: none; transition: background .15s ease; }
+.search::placeholder { opacity: .45; }
+.search:focus { background: var(--mgr-active); }
+
+/* Inset grouped sections (diagnostics, trash). */
+.section { display: flex; flex-direction: column; background: var(--mgr-surface); border-radius: 12px; overflow: hidden; margin-top: 4px; box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 4px 12px rgba(0,0,0,.04); }
+.sectionTitle { font-size: 13px; font-weight: 700; margin: 14px 16px 2px; }
+
+/* Small neutral pill buttons (row and section-level actions). */
+.opBtn { font-size: 11px; padding: 3px 11px; border-radius: 999px; border: none; background: var(--mgr-hover); color: inherit; cursor: pointer; transition: background .15s ease; }
+.opBtn:hover { background: var(--mgr-active); }
+.opBtn:disabled { opacity: .4; cursor: default; }
+
+/* Rows: hairline separators inside a card, no outer borders (trash list). */
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: transparent; cursor: pointer; transition: background .12s ease; }
+.row:hover { background: var(--mgr-hover); }
+.rowStatic { cursor: default; }
+.rowStatic:hover { background: transparent; }
+.row + .row { border-top: 0.5px solid var(--mgr-border); }
+.rowMain { flex: 1; min-width: 0; }
+.rowName { display: flex; align-items: center; gap: 5px; font-size: 13.5px; }
+.rowNameText { font-weight: 600; }
+.rowDesc { font-size: 12.5px; color: var(--mgr-text-3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Badge chips (source + duplicate markers on table rows). */
+.badge { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; border: 0.5px solid var(--mgr-border-2); color: var(--mgr-text-2); white-space: nowrap; }
+.badgeSource { background: var(--mgr-hover); border: none; opacity: .72; }
+.badgeDanger { color: var(--mgr-danger); border-color: currentColor; background: transparent; }
+
+.empty { font-size: 13px; color: var(--mgr-text-3); padding: 20px 0; text-align: center; }
+.diagRow { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; padding: 9px 14px; border-left: 3px solid var(--mgr-warn); background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 6%, transparent); }
+.diagRowMain { flex: 1; min-width: 0; }
+.diagAction { flex: none; align-self: center; }
+.diagPath { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--mgr-text-2); word-break: break-all; }
+.diagReason { color: var(--mgr-text-3); margin-top: 1px; }
+
+.errorBanner { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; color: var(--mgr-danger); background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 7%, transparent); border-radius: 10px; padding: 10px 14px; white-space: pre-wrap; word-break: break-all; }
+/* Green success banner (create/delete/restore finished); mirrors the error banner shape. */
+.successBanner { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; color: var(--mgr-success); background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 8%, transparent); border-radius: 10px; padding: 10px 14px; white-space: pre-wrap; word-break: break-all; }
+
+.detailHead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.back { background: var(--mgr-hover); border: none; color: inherit; border-radius: 8px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
+.back:hover { background: var(--mgr-active); }
+.detailName { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+.detailMeta { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--mgr-text-3); }
+.detailMetaLine { word-break: break-all; }
+.detailContent { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; background: var(--mgr-surface); border-radius: 12px; padding: 14px 16px; max-height: 62vh; overflow: auto; }
+
+.formRow { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.formLabel { font-size: 12px; color: var(--mgr-text-3); }
+.input, .select { padding: 9px 12px; border: none; border-radius: 9px; background: var(--mgr-surface); color: inherit; font-size: 13px; outline: none; }
+.input:focus, .select:focus { background: var(--mgr-active); }
+.button { padding: 6px 13px; border-radius: 8px; font-size: 12.5px; cursor: pointer; border: none; background: var(--mgr-hover); color: inherit; transition: background .15s ease; }
+.button:hover { background: var(--mgr-active); }
+.primary { background: var(--dsw-alias-button-primary-fill); color: var(--dsw-alias-label-primary-foreground); }
+.primary:hover { background: var(--dsw-alias-button-primary-hover); }
+.primary:disabled { opacity: .45; cursor: default; }
+.danger { background: var(--mgr-danger); color: var(--mgr-on-accent); }
+.danger:hover { background: var(--mgr-danger); opacity: .92; }
+.danger:disabled { opacity: .45; cursor: default; }
+.formError { color: var(--mgr-danger); }
+.formSuccess { color: var(--mgr-success); }
+
+/* Status dots (model/user invocable) — quiet circles, colors from settings. */
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-left: 5px; vertical-align: middle; }
+.dotModel { background: var(--mgr-model); }
+.dotUser { background: var(--mgr-user); }
+.displayName { font-size: 11px; color: var(--mgr-text-3); margin-left: 6px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; min-width: 0; flex-shrink: 1; }
+.legend { display: flex; align-items: center; gap: 12px; font-size: 11.5px; color: var(--mgr-text-3); flex-wrap: wrap; padding: 2px 2px 0; }
+.legendItem { display: inline-flex; align-items: center; gap: 4px; }
+.legendItem .dot { margin-left: 0; }
+.legendHint { opacity: .8; }
+
+.pluginVersion { font-size: 12px; font-weight: 500; color: var(--mgr-text-4); margin-left: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.legendToggle { flex: none; width: 22px; height: 22px; border-radius: 50%; border: none; background: var(--mgr-hover); color: inherit; font-size: 12px; line-height: 1; cursor: pointer; opacity: .55; transition: opacity .15s ease, background .15s ease; }
+.legendToggle:hover { opacity: 1; }
+.legendToggleActive { opacity: 1; background: var(--mgr-active); }
+
+/* Filter bar: sort + search + legend + the filter toggle share one row. */
+.filterBar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.filterBar .formLabel { margin: 0; }
+.filterBar .search { flex: 1; min-width: 160px; }
+.filterBar .formLabel { flex: none; }
+.filterBar .select { flex: none; max-width: 150px; }
+
+/* Invocation count: amber chip beside the skill name. */
+.useCount { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--mgr-warn); background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 12%, transparent); border-radius: 999px; padding: 0 6px; line-height: 1.6; vertical-align: 1px; }
+/* Relative last-used time: quiet text after the name chips. */
+.useTime { margin-left: auto; font-size: 11px; color: var(--mgr-text-4); white-space: nowrap; }
+
+/* ---- flat skills table (modelled on dsh-mcp-mgr's global-server table) ---- */
+.table { table-layout: fixed; border-collapse: collapse; width: 100%; font-size: 12px; }
+.table th, .table td { border-bottom: 1px solid var(--mgr-border); text-align: left; vertical-align: top; padding: 6px 8px; overflow: hidden; }
+.table th { color: var(--mgr-text-2); font-weight: 500; }
+.table tbody tr:hover td { background: var(--mgr-hover); }
+/* A disabled skill stays inline: same row, dimmed, with its switch off. */
+.table tr[data-enabled=false] td { opacity: .6; }
+.nowrapCell { white-space: nowrap; }
+.detailCell { white-space: nowrap; text-overflow: ellipsis; }
+.muted { color: var(--mgr-text-4); }
+.rowActions { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+
+/* Status badge: enabled / disabled (same treatment as the MCP manager's). */
+.statusBadge { white-space: nowrap; border-radius: 999px; padding: 1px 8px; font-size: 11px; display: inline-block; }
+.statusBadge[data-status=enabled] { color: var(--mgr-success); background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 10%, transparent); }
+.statusBadge[data-status=disabled] { background: color-mix(in srgb, currentColor 8%, transparent); opacity: .55; }
+
+/* Danger pill (row delete, empty trash). */
+.opDanger { color: var(--mgr-danger); background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent); }
+.opDanger:hover { background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 18%, transparent); }
+
+/* iOS-style centered dialog (confirm / new skill). */
+.dialogOverlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.35); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); padding: 24px; }
+.dialog { min-width: min(320px, 100%); max-width: 380px; background: var(--dsw-alias-bg-layer-1, #f5f5f7); color: var(--dsw-alias-label-primary, #1d1d1f); border-radius: 14px; padding: 18px 18px 14px; box-shadow: 0 12px 40px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.16); }
+.dialogTitle { margin: 0 0 8px; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.dialogText { margin: 0 0 10px; font-size: 12.5px; color: var(--mgr-text-3); line-height: 1.5; }
+.dialogList { margin: 0 0 14px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow: auto; }
+.dialogList li { font-size: 12.5px; opacity: .85; word-break: break-all; }
+.dialogActions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Panel title icon (skill identity). */
+.titleIcon { display: inline-block; vertical-align: -2px; margin-right: 2px; opacity: .8; }
+
+/* ---- inline-style replacements: one class per recurring layout intent. ---- */
+/* Muted one-line hint. */
+.hintLine { margin: 0; font-size: 11.5px; color: var(--mgr-text-3); }
+.hintInline { margin: 4px 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+.sectionHeadRow { display: flex; align-items: center; gap: 8px; }
+.sectionTitleFill { flex: 1; }
+
+/* ---- Workspaces tab: one collapsible box per registered workspace ---- */
+.workspace { border: 1px solid var(--mgr-border); border-radius: 12px; overflow: hidden; }
+.workspaceHead { width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; background: none; border: 0; display: flex; align-items: center; gap: 8px; padding: 9px 12px; font-size: 13px; }
+.workspaceHead:hover { background: var(--mgr-hover); }
+.workspaceChevron { flex: none; display: inline-block; color: var(--mgr-text-3); transition: transform .15s ease; }
+.workspaceChevron[data-open=true] { transform: rotate(90deg); }
+.workspaceTitle { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspaceCount { color: var(--mgr-text-3); font-size: 12px; font-variant-numeric: tabular-nums; flex: none; }
+.workspacePath { max-width: 55%; color: var(--mgr-text-4); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: auto; }
+.workspaceBody { border-top: 1px solid var(--mgr-border); display: flex; flex-direction: column; gap: 6px; padding: 8px 12px 10px; }
+.panelHead { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+.panelHint { flex: 1; min-width: 0; }
+/* One selectable profile skill: checkbox + name + source badge. */
+.pick { display: flex; cursor: pointer; align-items: center; gap: 8px; font-size: 13px; }
+.pickName { font-weight: 500; }
+.pickMeta { color: var(--mgr-text-4); font-size: 11px; }
+.warning { color: var(--dsw-alias-state-warn-label); overflow-wrap: anywhere; margin: 0; font-size: 12px; }
+.subHeading { margin: 8px 0 0; font-size: 13px; font-weight: 600; color: var(--mgr-text-2); }
+/* One project skill the workspace contributes (read-only until adopted). */
+.localRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
+.localName { font-weight: 500; }
+.localBadge { background: var(--mgr-surface); color: var(--mgr-text-3); border-radius: 999px; padding: 0 6px; font-size: 11px; }
+.localActions { display: inline-flex; gap: 4px; margin-left: auto; }
+
+/* ---- 筛选面板、焦点环、点击区域、骨架屏、减少动效 ---- */
+
+/* 筛选面板：搜索/排序/图例常驻，「来源 + 调用方式」收进这里。 */
+.filterPanel { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 12px; background: var(--mgr-surface); border-radius: 10px; }
+.filterField { display: inline-flex; align-items: center; gap: 6px; }
+.filterField .formLabel { margin: 0; }
+.filterField .select { max-width: 150px; }
+
+/* 键盘焦点环：只在 focus-visible（键盘操作）时出现，鼠标点击不打扰。 */
+.opBtn:focus-visible, .button:focus-visible,
+.input:focus-visible, .select:focus-visible, .search:focus-visible,
+.legendToggle:focus-visible, .back:focus-visible,
+.workspaceHead:focus-visible {
+  outline: 2px solid var(--mgr-accent);
+  outline-offset: 2px;
+}
+
+/* 点击区域：小控件补到 28px（原 22-24px 偏小）。 */
+.opBtn { padding: 4px 12px; }
+.legendToggle { width: 28px; height: 28px; }
+
+/* 加载骨架屏（替代单行「加载中」）。 */
+.skeleton { display: flex; flex-direction: column; gap: 8px; padding: 14px; background: var(--mgr-surface); border-radius: 12px; }
+.skeletonRow { height: 14px; border-radius: 7px; background: var(--mgr-skeleton); animation: mgrPulse 1.4s ease-in-out infinite; }
+.skeletonRow:nth-child(2) { width: 82%; }
+.skeletonRow:nth-child(3) { width: 64%; }
+@keyframes mgrPulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+/* 系统「减少动效」偏好：关闭过渡与脉冲动画。 */
+@media (prefers-reduced-motion: reduce) {
+  .page *, .page *::before, .page *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

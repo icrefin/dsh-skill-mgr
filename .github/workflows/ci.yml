@@ -1,0 +1,60 @@
+# Continuous integration for dsh-skill-mgr.
+#
+# Mirrors what `pnpm check` does locally — typecheck both halves, build the host
+# output and the browser bundle, run the vitest suite, then run the three
+# verifiers (codec/descriptor contract, the host service on a real Cordis
+# context, and the built bundle behind a stub module loader) — so a green badge
+# means the same thing here as on a contributor's machine.
+#
+# The peer dependencies (@deepseek-ai/*) are published on npm, so a clean
+# checkout really does install. `pnpm/action-setup` reads `packageManager` from
+# package.json, which is why no version is repeated here.
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Read-only: this workflow never writes to the repository.
+permissions:
+  contents: read
+
+# One run per branch/PR; a new push cancels the in-progress run instead of queueing it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: "1"
+
+jobs:
+  check:
+    name: typecheck · test · build · verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Version comes from package.json "packageManager" (pnpm@11.8.0).
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # package.json declares "node": "^22.19.0 || >=24.0.0".
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Check
+        run: pnpm check
+
+      - name: Prove the package packs
+        run: pnpm pack

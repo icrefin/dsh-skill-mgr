@@ -1,0 +1,4 @@
+# Build output: `pnpm build` regenerates lib/ from src/.
+lib/
+node_modules/
+dist/
