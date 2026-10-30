@@ -22,7 +22,7 @@ before you write the implementation.
 ## Development setup
 
 This is a TypeScript package built with pnpm. It needs
-**Node `^22.19.0 || >=24.0.0`** and **pnpm 11.8.0**, the version pinned in the
+**Node `^22.19.0 || >=24.0.0`** and **pnpm 11.20.0**, the version pinned in the
 manifest through `packageManager` (`corepack enable` picks it up). The
 `@deepseek-ai/dsh-*` peer dependencies are published on npm, so a clean checkout
 really does install.
@@ -217,7 +217,7 @@ Open an issue, or start a discussion in the repository's *Discussions* tab.
 ## 开发环境
 
 本项目是用 pnpm 构建的 TypeScript 包，需要 **Node `^22.19.0 || >=24.0.0`** 与
-**pnpm 11.8.0**（manifest 的 `packageManager` 字段已固定该版本，`corepack enable`
+**pnpm 11.20.0**（manifest 的 `packageManager` 字段已固定该版本，`corepack enable`
 会自动采用）。`@deepseek-ai/dsh-*` 这些 peer 依赖已发布到 npm，
 因此在干净的检出上可以直接安装。
 
