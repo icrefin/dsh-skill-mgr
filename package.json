@@ -1,6 +1,6 @@
 {
   "name": "dsh-skill-mgr",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Profile-level skill manager for DeepSeek Harness: a flat skill inventory with enable/disable, discovery diagnostics and a restorable trash, managed from a left-sidebar panel through a Typert Remote",
   "keywords": [
     "deepseek-harness",
@@ -91,7 +91,6 @@
     "@deepseek-ai/dsh-session-query": "0.2.2-rc.2",
     "@deepseek-ai/dsh-settings": "0.2.2-rc.2",
     "@deepseek-ai/dsh-skill": "0.2.2-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "0.2.2-rc.2",
     "@deepseek-ai/dsh-typert-protocol": "0.2.2-rc.2",
     "@deepseek-ai/schemastery": "~3.19.0",
     "react": "^18.2.0"
@@ -101,9 +100,6 @@
       "optional": true
     },
     "@deepseek-ai/dsh-settings": {
-      "optional": true
-    },
-    "@deepseek-ai/dsh-system-prompt": {
       "optional": true
     }
   },
@@ -124,7 +120,6 @@
     "@deepseek-ai/dsh-session-query": "0.2.2-rc.2",
     "@deepseek-ai/dsh-settings": "0.2.2-rc.2",
     "@deepseek-ai/dsh-skill": "0.2.2-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "0.2.2-rc.2",
     "@deepseek-ai/dsh-typert-protocol": "0.2.2-rc.2",
     "@deepseek-ai/schemastery": "~3.19.0",
     "@types/js-yaml": "^4.0.9",

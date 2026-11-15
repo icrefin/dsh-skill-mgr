@@ -26,7 +26,6 @@ import type { SettingsNamespace } from '@deepseek-ai/dsh-settings'
 // plugin imports it under this name.
 import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-skill'
-import type {} from '@deepseek-ai/dsh-system-prompt'
 import type {} from '@deepseek-ai/dsh-session-query'
 import type {} from '@deepseek-ai/dsh-settings'
 import { HEX_COLOR_RE, MGR_CONFIG_DEFAULTS, MGR_ENTRY_ID, resolveMgrConfig, type MgrConfig } from './config.ts'
@@ -47,7 +46,7 @@ export const name = 'skill-mgr'
  * `settings` is deliberately absent: the plugin reads its own volatile config
  * refs and only reaches for the settings service when it is present.
  */
-export const inject = ['skills', 'systemPrompt']
+export const inject = ['skills']
 
 /**
  * Plugin config, validated by the same-named schemastery schema.
@@ -60,10 +59,8 @@ export const inject = ['skills', 'systemPrompt']
  * through the settings transport.
  */
 export interface Config {
-  /** Master switch: when false the plugin contributes no skills and no announcement. The panel keeps working so it can be turned back on. */
+  /** Master switch: when false the plugin contributes no skills. The panel keeps working so it can be turned back on. */
   enabled: Volatile<boolean>
-  /** When true (default), a system-prompt section announces the manager to every agent. */
-  announceToAgent: Volatile<boolean>
   /** Show per-skill invocation count chip. Default true. */
   showUseCount: Volatile<boolean>
   /** Show per-skill last-used relative time. Default true. */
@@ -86,8 +83,7 @@ export interface Config {
  * every wire read.
  */
 const ConfigFields = {
-  enabled: z.boolean().default(MGR_CONFIG_DEFAULTS.enabled).description('关闭后本插件不再向 Agent 提供技能与公告；管理面板仍可用，便于重新开启。'),
-  announceToAgent: z.boolean().default(MGR_CONFIG_DEFAULTS.announceToAgent).description('在系统提示中加入本插件说明，用户提到技能管理时 Agent 知道如何协作。'),
+  enabled: z.boolean().default(MGR_CONFIG_DEFAULTS.enabled).description('关闭后本插件不再向 Agent 提供技能；管理面板仍可用，便于重新开启。'),
   dotModelColor: z.string().pattern(HEX_COLOR_RE).description('技能行与聊天「/」菜单中「模型可调」圆点的颜色（#rrggbb）。'),
   dotUserColor: z.string().pattern(HEX_COLOR_RE).description('技能行与聊天「/」菜单中「仅用户可调」圆点的颜色（#rrggbb）。'),
   showUseCount: z.boolean().default(MGR_CONFIG_DEFAULTS.showUseCount).description('在技能名旁显示调用次数。'),
@@ -102,7 +98,6 @@ const ConfigFields = {
  */
 export const Config = z.object({
   enabled: ConfigFields.enabled.volatile(),
-  announceToAgent: ConfigFields.announceToAgent.volatile(),
   dotModelColor: ConfigFields.dotModelColor.volatile(),
   dotUserColor: ConfigFields.dotUserColor.volatile(),
   showUseCount: ConfigFields.showUseCount.volatile(),
@@ -121,7 +116,6 @@ export const ENTRY_ID = MGR_ENTRY_ID as SettingsNamespace
 /** Every config field, in the order the settings page renders them (used to walk the volatile refs). */
 const CONFIG_FIELDS = [
   'enabled',
-  'announceToAgent',
   'dotModelColor',
   'dotUserColor',
   'showUseCount',
@@ -130,18 +124,9 @@ const CONFIG_FIELDS = [
   'statsScanMinutes',
 ] as const
 
-/** Order of the announcement section within the tool-guidance band. */
-const SECTION_ORDER = 152
-
-/** Model-facing announcement: plugin presence, capabilities, and limits. */
-export const SKILL_MGR_GUIDANCE = [
-  '本机已安装 dsh-skill-mgr 插件（DSH Web GUI 技能管理器）：侧边栏左列「技能管理」面板是管理主页（在「插件」下方）。能力：Profile 技能清单（用户级 ~/.dsh/skills 与 ~/.agents/skills，走官方 ctx.skills 注册表，含第三方 provider），单个或批量启用/禁用（禁用即把 SKILL.md 改名，可随时恢复）、查看正文、发现诊断一键修复、新建技能向导、删除（移入回收站，可恢复）；调用次数与最近使用时间统计。限制：只有用户级技能可写，项目/内置/运行时技能只读展示。用户提到「技能管理 / 技能列表 / 技能开关 / 删除技能 / 更新技能 / 新建技能」时即指本插件，请据此协作。',
-  'The dsh-skill-mgr plugin is installed (the DSH Web GUI skill manager): the "Skills" panel in the left sidebar (just under Plugins) is the management page. Capabilities: the profile skill inventory (user roots ~/.dsh/skills and ~/.agents/skills, via the official ctx.skills registry including third-party providers), per-skill and batch enable/disable (disabling renames SKILL.md, and is reversible), body inspection, one-click repair of discovery diagnostics, a new-skill wizard, and deletion into a restorable trash; invocation counts and last-used times. Limits: only user-level skills are writable; project/bundled/runtime skills are read-only. When the user mentions "skill management / skill list / skill toggle / delete skill / update skills / new skill", this plugin is what they mean — collaborate accordingly.',
-].join('\n\n')
-
 /**
- * Mount the Remote, the skill provider and the announcement.
- * @param ctx - host plugin context carrying skills/systemPrompt/settings.
+ * Mount the Remote and the skill provider.
+ * @param ctx - host plugin context carrying skills/settings.
  * @param config - the Loader entry's volatile config refs.
  */
 export function apply(ctx: Context, config?: Config): void {
@@ -173,7 +158,6 @@ export function apply(ctx: Context, config?: Config): void {
     LEGACY_STATE_FILES.map((file) => join(home, file)),
   )
 
-  let disposeSection: (() => void) | undefined
   let disposeProvider: (() => void) | undefined
   let providerControl: SkillProviderControl | undefined
 
@@ -196,25 +180,14 @@ export function apply(ctx: Context, config?: Config): void {
   // the user with no surface at all.
   new SkillMgrGateway(ctx, deps)
 
-  // Register (or drop) every configurable surface. Each group is kept under one
-  // disposer so re-registering tears the old one down first.
+  // Register (or drop) the configurable skill provider. The effect is kept under
+  // one disposer so re-registering tears the old one down first.
   const sync = (): void => {
-    if (disposeSection !== undefined) {
-      disposeSection()
-      disposeSection = undefined
-    }
     if (disposeProvider !== undefined) {
       disposeProvider()
       disposeProvider = undefined
     }
     const value = current()
-    if (value.announceToAgent) {
-      disposeSection = ctx.systemPrompt.section({
-        name: 'plugin:dsh-skill-mgr',
-        order: SECTION_ORDER,
-        text: SKILL_MGR_GUIDANCE,
-      })
-    }
     if (value.enabled) {
       providerControl = undefined
       disposeProvider = ctx.effect(
@@ -225,7 +198,7 @@ export function apply(ctx: Context, config?: Config): void {
         'dsh-skill-mgr: provider',
       )
     }
-    ctx.logger.info(`[dsh-skill-mgr] surfaces synced: enabled=${value.enabled} announceToAgent=${value.announceToAgent}`)
+    ctx.logger.info(`[dsh-skill-mgr] surfaces synced: enabled=${value.enabled}`)
   }
 
   // Initial registration from the composition entry. Later changes — the

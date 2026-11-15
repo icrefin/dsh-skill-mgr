@@ -96,7 +96,7 @@ describe('wrapSkillSource', () => {
       { name: 'code-review', modelInvocable: true },
       { name: 'personal-note', modelInvocable: false },
     ])
-    const scope = scopeWith({ enabled: true, announceToAgent: true, showUseCount: true, showUseTime: true, dotModelColor: '#112233', dotUserColor: '#445566' })
+    const scope = scopeWith({ enabled: true, showUseCount: true, showUseTime: true, dotModelColor: '#112233', dotUserColor: '#445566' })
 
     const restore = wrapSkillSource(source, api, scope)
     try {
@@ -118,7 +118,7 @@ describe('wrapSkillSource', () => {
   it('still returns the rows when the catalog route is down', async () => {
     const source = skillSource(async () => [{ name: 'lonely', description: '' }])
     const api = { catalog: async () => { throw new Error('route down') } } as unknown as SkillMgrApi
-    const scope = scopeWith({ enabled: true, announceToAgent: true, showUseCount: true, showUseTime: true })
+    const scope = scopeWith({ enabled: true, showUseCount: true, showUseTime: true })
 
     const restore = wrapSkillSource(source, api, scope)
     try {
@@ -136,7 +136,7 @@ describe('wrapSkillSource', () => {
     const originalCandidates = async (): Promise<InputTriggerCandidate[]> => [{ name: 'plain', description: '' }]
     const source = skillSource(originalCandidates)
     const api = apiWith([])
-    const scope = scopeWith({ enabled: true, announceToAgent: true, showUseCount: true, showUseTime: true })
+    const scope = scopeWith({ enabled: true, showUseCount: true, showUseTime: true })
 
     const restore = wrapSkillSource(source, api, scope)
     expect(source.candidates).not.toBe(originalCandidates)

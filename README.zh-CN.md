@@ -88,8 +88,7 @@ Loader 条目的 config 就是设置卡片；host 通过对应的 volatile ref �
 
 | 字段 | 默认值 | 含义 |
 |---|---|---|
-| `enabled` | `true` | 提供技能 provider 与公告；无论如何管理面板都照常工作，因为它正是把插件重新打开的那个界面 |
-| `announceToAgent` | `true` | 注册告诉 agent 存在这个管理器的 system-prompt 段落 |
+| `enabled` | `true` | 提供技能 provider；无论如何管理面板都照常工作，因为它正是把插件重新打开的那个界面 |
 | `showUseCount` | `true` | 每个技能的调用次数徽标 |
 | `showUseTime` | `true` | 每个技能的最近使用相对时间 |
 | `dotModelColor` | 未设置 | 表格与聊天 `/` 菜单里“模型可调”圆点的 `#rrggbb` |

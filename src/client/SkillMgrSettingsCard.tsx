@@ -1,7 +1,7 @@
 /**
  * The dsh-skill-mgr plugin settings card: bridges the mgr's settings
  * namespace (bound through the official settings transport) onto the
- * family-style staged card form (enabled master switch + agent announcement).
+ * family-style staged card form (enabled master switch plus display options).
  * Registered into `plugins.bundle.config` under the bundle's package name, so
  * the Plugins manager renders it on dsh-skill-mgr's own page. That slot is
  * dispatched with `view: 'page'` only, so the card always renders its full
@@ -21,7 +21,6 @@ import { DEFAULT_DOT_MODEL_COLOR, DEFAULT_DOT_USER_COLOR } from './panel/format.
 /** The card's projected state. */
 export interface SkillMgrSettingsState extends CardShell {
   enabled: FieldState
-  announceToAgent: FieldState
   dotModelColor: FieldState
   dotUserColor: FieldState
   showUseCount: FieldState
@@ -62,7 +61,7 @@ export class SkillMgrSettingsCardController {
 
   /** @param scope - the mgr settings scope the card edits (FormScope-compatible). */
   constructor(scope: FormScope) {
-    this.form = new CardForm(scope, [booleanField('enabled'), booleanField('announceToAgent'), colorField('dotModelColor'), colorField('dotUserColor'), booleanField('showUseCount'), booleanField('showUseTime'), numberField('statsWindowDays', { min: 0, max: 3650 }), numberField('statsScanMinutes', { min: 1, max: 1440 })])
+    this.form = new CardForm(scope, [booleanField('enabled'), colorField('dotModelColor'), colorField('dotUserColor'), booleanField('showUseCount'), booleanField('showUseTime'), numberField('statsWindowDays', { min: 0, max: 3650 }), numberField('statsScanMinutes', { min: 1, max: 1440 })])
     this.store = this.form.bind(() => this.projection())
   }
 
@@ -70,7 +69,6 @@ export class SkillMgrSettingsCardController {
     return {
       ...this.form.shell(),
       enabled: this.form.field('enabled'),
-      announceToAgent: this.form.field('announceToAgent'),
       dotModelColor: this.form.field('dotModelColor'),
       dotUserColor: this.form.field('dotUserColor'),
       showUseCount: this.form.field('showUseCount'),
@@ -95,7 +93,6 @@ export class SkillMgrSettingsCardController {
 /** The card's field rows in render order; the rendered DOM order follows it. */
 const FIELD_ROWS: readonly FieldRow[] = [
   { kind: 'switch', field: 'enabled', label: 'settings.enabled', hint: 'settings.enabledHint' },
-  { kind: 'switch', field: 'announceToAgent', label: 'settings.announceToAgent', hint: 'settings.announceToAgentHint' },
   { kind: 'color', field: 'dotModelColor', id: 'skill-mgr-dot-model-color', label: 'settings.dotModelColor', hint: 'settings.dotModelColorHint', defaultColor: DEFAULT_DOT_MODEL_COLOR },
   { kind: 'color', field: 'dotUserColor', id: 'skill-mgr-dot-user-color', label: 'settings.dotUserColor', hint: 'settings.dotUserColorHint', defaultColor: DEFAULT_DOT_USER_COLOR },
   { kind: 'switch', field: 'showUseCount', label: 'settings.showUseCount', hint: 'settings.showUseCountHint' },

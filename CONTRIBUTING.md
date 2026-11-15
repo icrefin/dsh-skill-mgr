@@ -11,7 +11,7 @@ Please keep both halves on official APIs — no dsh source patches.
 ## Layout
 
 ```
-src/index.ts              cordis plugin entry (config schema, skill provider, announcement, stats)
+src/index.ts              cordis plugin entry (config schema, skill provider, stats)
 src/gateway.ts            the `skillMgr` Typert Remote service (one @Remote per method)
 src/wire.ts               every wire payload as a zod schema (types are z.infer of these)
 src/typert.descriptors.ts the single descriptor table both published faces are built from

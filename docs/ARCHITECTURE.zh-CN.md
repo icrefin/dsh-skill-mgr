@@ -11,7 +11,7 @@
 ```
 dsh-skill-mgr/
 ├── src/                              host and browser halves (TypeScript)
-│   ├── index.ts                      cordis entry: config, provider, announcement, stats
+│   ├── index.ts                      cordis entry: config, provider, stats
 │   ├── gateway.ts                    the `skillMgr` Typert Remote service
 │   ├── wire.ts                       every wire payload, as zod schemas
 │   ├── typert.descriptors.ts         the one descriptor table both faces share
@@ -186,8 +186,7 @@ Loader 条目的配置就是设置卡片。宿主通过相应的 volatile ref �
 
 | 字段 | 默认值 | 含义 |
 |---|---|---|
-| `enabled` | `true` | 贡献技能 provider 与公告；管理面板无论哪种情况都继续可用，因为正是它把插件重新打开 |
-| `announceToAgent` | `true` | 注册告诉 agent 本管理器存在的系统提示词小节 |
+| `enabled` | `true` | 贡献技能 provider；管理面板无论哪种情况都继续可用，因为正是它把插件重新打开 |
 | `showUseCount` | `true` | 每个技能的调用次数标签 |
 | `showUseTime` | `true` | 每个技能的最近使用相对时间 |
 | `dotModelColor` | 未设置 | "可被模型调用"圆点的 `#rrggbb`，用于表格和聊天 `/` 菜单 |

@@ -11,10 +11,8 @@
 
 /** The skill manager's own runtime configuration, edited from the settings card. */
 export interface MgrConfig {
-  /** Master switch: when false the plugin contributes no skills and no announcement. */
+  /** Master switch: when false the plugin contributes no skills. */
   enabled: boolean
-  /** When true, a system-prompt section announces the manager to every agent. */
-  announceToAgent: boolean
   /** Model-invocable dot color (#rrggbb); absent means the panel default. */
   dotModelColor?: string
   /** User-invocable dot color (#rrggbb); absent means the panel default. */
@@ -37,7 +35,6 @@ export interface MgrConfig {
  */
 export type MgrSettingsValue = {
   enabled: boolean
-  announceToAgent: boolean
   showUseCount: boolean
   showUseTime: boolean
   /** Model-invocable dot color (#rrggbb); absent means the panel default. */
@@ -66,7 +63,6 @@ export const MGR_ENTRY_ID = 'skill-mgr'
  */
 export const MGR_CONFIG_DEFAULTS = {
   enabled: true,
-  announceToAgent: true,
   showUseCount: true,
   showUseTime: true,
   statsWindowDays: 14,
@@ -88,7 +84,6 @@ export function resolveMgrConfig(saved: Partial<MgrConfig>, base: Partial<MgrCon
   const scanMinutes = clampNumber(saved.statsScanMinutes ?? base.statsScanMinutes, 1) ?? MGR_CONFIG_DEFAULTS.statsScanMinutes
   return {
     enabled: saved.enabled ?? base.enabled ?? MGR_CONFIG_DEFAULTS.enabled,
-    announceToAgent: saved.announceToAgent ?? base.announceToAgent ?? MGR_CONFIG_DEFAULTS.announceToAgent,
     showUseCount: saved.showUseCount ?? base.showUseCount ?? MGR_CONFIG_DEFAULTS.showUseCount,
     showUseTime: saved.showUseTime ?? base.showUseTime ?? MGR_CONFIG_DEFAULTS.showUseTime,
     statsWindowDays: windowDays,

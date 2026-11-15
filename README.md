@@ -88,8 +88,7 @@ The Loader entry's config is the settings card; the host reads the same values t
 
 | Field | Default | Meaning |
 |---|---|---|
-| `enabled` | `true` | contribute the skill provider and the announcement; the management panel keeps working either way, because it is the surface that turns the plugin back on |
-| `announceToAgent` | `true` | register the system-prompt section that tells an agent this manager exists |
+| `enabled` | `true` | contribute the skill provider; the management panel keeps working either way, because it is the surface that turns the plugin back on |
 | `showUseCount` | `true` | per-skill invocation-count chip |
 | `showUseTime` | `true` | per-skill last-used relative time |
 | `dotModelColor` | unset | `#rrggbb` for the "model-invocable" dot, in the table and the chat `/` menu |
